@@ -29,6 +29,11 @@ public class Entry {
     @ManyToOne
     private ApplicationUser applicationUser;
 
+    @JoinColumn(nullable = false)
+    @ManyToOne
+    private Category category;
+
+
     public Long getId() {
         return id;
     }
@@ -59,5 +64,13 @@ public class Entry {
 
     public void setApplicationUser(ApplicationUser applicationUser) {
         this.applicationUser = applicationUser;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 }
