@@ -2,7 +2,7 @@ package ch.zli.m223.punchclock.service;
 
 import ch.zli.m223.punchclock.domain.BackgroundColor;
 import ch.zli.m223.punchclock.repository.BackgroundColorRepository;
-import org.jvnet.hk2.annotations.Service;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 

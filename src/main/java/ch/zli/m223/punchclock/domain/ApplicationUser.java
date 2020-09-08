@@ -11,11 +11,13 @@ public class ApplicationUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    @Column(unique = true, nullable = false)
     private String username;
     @JsonIgnore
+    @Column(nullable = false, length=4096)
     private String password;
 
-    @Column
+    @Column(nullable = false)
     private String role;
 
     @OneToMany
