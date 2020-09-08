@@ -15,6 +15,9 @@ public class ApplicationUser {
     @JsonIgnore
     private String password;
 
+    @Column
+    private String role;
+
     @OneToMany
     private List<Entry> entries;
 
@@ -48,5 +51,13 @@ public class ApplicationUser {
 
     public void setEntries(List<Entry> entries) {
         this.entries = entries;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }
