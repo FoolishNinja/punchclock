@@ -39,6 +39,7 @@ public class ApplicationUser {
         return password;
     }
 
+    @JsonProperty
     public void setPassword(String password) {
         this.password = password;
     }
