@@ -29,6 +29,7 @@ public class EntryController {
     @ResponseStatus(HttpStatus.OK)
     public List<Entry> getAllEntries(Principal principal) {
         ApplicationUser applicationUser = userDetailsService.getUserByUsername(principal.getName());
+        if(applicationUser.getRole().equals("ADMIN")) return entryService.findAll();
         return entryService.findAll().stream().filter(entry -> entry.getApplicationUser().getId() == applicationUser.getId()).collect(Collectors.toList());
     }
 
@@ -46,7 +47,7 @@ public class EntryController {
         ApplicationUser applicationUser = userDetailsService.getUserByUsername(principal.getName());
         Optional<Entry> entry = entryService.findById(id);
         if(entry.isEmpty()) throw new BadRequestException();
-        if(entry.get().getApplicationUser().getId() != applicationUser.getId()) throw new BadRequestException();
+        if(!applicationUser.getRole().equals("ADMIN") && entry.get().getApplicationUser().getId() != applicationUser.getId()) throw new BadRequestException();
         entryService.deleteEntry(id);
     }
 
@@ -56,7 +57,7 @@ public class EntryController {
         ApplicationUser applicationUser = userDetailsService.getUserByUsername(principal.getName());
         Optional<Entry> e = entryService.findById(entry.getId());
         if(e.isEmpty()) throw new BadRequestException();
-        if(e.get().getApplicationUser().getId() != applicationUser.getId()) throw new BadRequestException();
+        if(!applicationUser.getRole().equals("ADMIN") && e.get().getApplicationUser().getId() != applicationUser.getId()) throw new BadRequestException();
         return entryService.updateEntry(entry);
     }
 }
