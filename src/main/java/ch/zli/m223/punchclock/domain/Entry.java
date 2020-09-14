@@ -73,4 +73,15 @@ public class Entry {
     public void setCategory(Category category) {
         this.category = category;
     }
+
+    @Override
+    public String toString() {
+        return "Entry{" +
+                "id=" + id +
+                ", checkIn=" + checkIn +
+                ", checkOut=" + checkOut +
+                ", applicationUser=" + applicationUser +
+                ", category=" + category +
+                '}';
+    }
 }

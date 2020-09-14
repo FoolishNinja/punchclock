@@ -1,39 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport"
-              content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Punchclock Client</title>
-        <link rel="stylesheet" type="text/css" href="style.css" />
-        <script src="script.js" type="application/javascript"></script>
-    </head>
-    <body>
-        <form id="entryForm">
-            <label for="checkIn">Check in</label>
-            <input type="date" name="checkInDate" id="checkIn" required>
-            <input type="time" name="checkInTime" required>
-            <label for="checkOut">Check out</label>
-            <input type="date" name="checkOutDate" id="checkOut" required>
-            <input type="time" name="checkOutTime" required>
-            <input type="submit" value="Save" />
-            <input type="reset" value="Cancel" />
-        </form>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Check in</th>
-                    <th>Check out</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="entryDisplay">
-                <tr>
-                    <td colspan="3">Loading...</td>
-                </tr>
-            </tbody>
-        </table>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Punchclock Client</title>
+    <link rel="stylesheet" type="text/css" href="style.css"/>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="script.js" type="application/javascript"></script>
+</head>
+<body>
+<div id="login-form-container" style="display: none;">
+    <h3>Login</h3>
+    <form id="login-form">
+        <div class="form-group">
+            <label for="loginInputUsername">Username</label>
+            <input required type="text" class="form-control" id="loginInputUsername" placeholder="Enter username">
+        </div>
+        <div class="form-group">
+            <label for="loginInputPassword">Password</label>
+            <input required type="password" class="form-control" id="loginInputPassword" placeholder="Password">
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+    <button class="btn btn-secondary mt-3" onclick="promptRegister()">Register</button>
+</div>
+<div id="register-form-container" style="display: none;">
+    <h3>Register</h3>
+    <form id="register-form">
+        <div class="form-group">
+            <label for="registerInputUsername">Username</label>
+            <input type="text" class="form-control" id="registerInputUsername" placeholder="Username">
+        </div>
+        <div class="form-group">
+            <label for="registerInputPassword">Password</label>
+            <input required type="password" class="form-control" id="registerInputPassword" placeholder="Password">
+        </div>
+        <div class="form-group">
+            <label for="registerInputRepeatPassword">Password</label>
+            <input required type="password" class="form-control" id="registerInputRepeatPassword"
+                   placeholder="Repeat password">
+        </div>
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+    <button class="btn btn-secondary mt-3" onclick="promptLogin()">Login</button>
+</div>
+<div id="work-time-overview-container" style="display: none;">
+    <h3>Overview</h3>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Username</th>
+            <th scope="col">Category</th>
+            <th scope="col">Check in</th>
+            <th scope="col">Check out</th>
+            <th scope="col">Edit</th>
+            <th scope="col">Delete</th>
+        </tr>
+        </thead>
+        <tbody id="entries-table-body">
+
+        </tbody>
+    </table>
+    <button class="btn btn-primary" onclick="promptAddNewWorkTime()">Add new work time</button>
+</div>
+<div id="add-work-time-container" style="display: none;">
+    <h3>Add work time</h3>
+    <form id="add-work-time-form">
+        <div class="form-group">
+            <label for="addWorkTimeInputCategory">Category</label>
+            <select required class="form-control" id="addWorkTimeInputCategory"></select>
+        </div>
+        <div class="form-group">
+            <label for="addWorkTimeInputCheckIn">Check in</label>
+            <input required type="datetime-local" class="form-control" id="addWorkTimeInputCheckIn"
+                   placeholder="Select a start time">
+        </div>
+        <div class="form-group">
+            <label for="addWorkTimeInputCheckOut">Check out</label>
+            <input required type="datetime-local" class="form-control" id="addWorkTimeInputCheckOut"
+                   placeholder="Select an end time">
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+    <button class="btn btn-secondary mt-3" onclick="toggleWorkTimeOverview()">Cancel</button>
+</div>
+<div id="edit-work-time-container" style="display: none;">
+    <h3>Edit work time</h3>
+    <form id="edit-work-time-form">
+        <div class="form-group">
+            <label for="editWorkTimeInputCategory">Category</label>
+            <select required class="form-control" id="editWorkTimeInputCategory"></select>
+        </div>
+        <div class="form-group">
+            <label for="editWorkTimeInputCheckIn">Check in</label>
+            <input required type="datetime-local" class="form-control" id="editWorkTimeInputCheckIn"
+                   placeholder="Select a start time">
+        </div>
+        <div class="form-group">
+            <label for="editWorkTimeInputCheckOut">Check out</label>
+            <input required type="datetime-local" class="form-control" id="editWorkTimeInputCheckOut"
+                   placeholder="Select an end time">
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+    <button class="btn btn-secondary mt-3" onclick="toggleWorkTimeOverview()">Cancel</button>
+</div>
+<div id="edit-background-color-container" style="display: none;">
+    <h3>Set background color</h3>
+    <form id="edit-background-color-form">
+        <div class="form-group">
+            <label for="editBackgroundColorInputColor">Background color</label>
+            <input required type="color" class="form-control" id="editBackgroundColorInputColor"
+                   placeholder="Select a color">
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+    <button class="btn btn-secondary mt-3" onclick="toggleWorkTimeOverview()">Cancel</button>
+</div>
+<div id="users-overview-container" style="display: none;">
+    <h3>User overview</h3>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Username</th>
+            <th scope="col">Is admin</th>
+            <th scope="col">Edit</th>
+            <th scope="col">Delete</th>
+        </tr>
+        </thead>
+        <tbody id="users-table-body">
+
+        </tbody>
+    </table>
+    <button class="btn btn-primary" onclick="promptAddUser()">Add new user</button>
+    <button class="btn btn-secondary" onclick="toggleWorkTimeOverview()">Back</button>
+</div>
+<div id="add-user-container" style="display: none;">
+    <h3>Add user</h3>
+    <form id="add-user-form">
+        <div class="form-group">
+            <label for="addUserInputRole">Role</label>
+            <select required class="form-control" id="addUserInputRole">
+                <option value="ADMIN">Admin</option>
+                <option value="USER">User</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="addUserInputUsername">Username</label>
+            <input required type="text" class="form-control" id="addUserInputUsername"
+                   placeholder="Username">
+        </div>
+        <div class="form-group">
+            <label for="addUserInputPassword">Password</label>
+            <input required type="password" class="form-control" id="addUserInputPassword"
+                   placeholder="Password">
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+    <button class="btn btn-secondary mt-3" onclick="toggleWorkTimeOverview()">Cancel</button>
+</div>
+<div id="edit-user-container" style="display: none;">
+    <h3>Edit user</h3>
+    <form id="edit-user-form">
+        <div class="form-group">
+            <label for="editUserInputRole">Role</label>
+            <select required class="form-control" id="editUserInputRole">
+                <option value="ADMIN">Admin</option>
+                <option value="USER">User</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="editUserInputUsername">Username</label>
+            <input required type="text" class="form-control" id="editUserInputUsername"
+                   placeholder="Username">
+        </div>
+        <div class="form-group">
+            <label for="editUserInputPassword">Password</label>
+            <input required type="password" class="form-control" id="editUserInputPassword"
+                   placeholder="Password">
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+    <button class="btn btn-secondary mt-3" onclick="toggleWorkTimeOverview()">Cancel</button>
+</div>
+</body>
 </html>

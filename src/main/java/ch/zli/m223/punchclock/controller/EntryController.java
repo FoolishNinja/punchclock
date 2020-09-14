@@ -29,8 +29,9 @@ public class EntryController {
     @ResponseStatus(HttpStatus.OK)
     public List<Entry> getAllEntries(Principal principal) {
         ApplicationUser applicationUser = userDetailsService.getUserByUsername(principal.getName());
-        if(applicationUser.getRole().equals("ADMIN")) return entryService.findAll();
-        return entryService.findAll().stream().filter(entry -> entry.getApplicationUser().getId() == applicationUser.getId()).collect(Collectors.toList());
+        if (applicationUser.getRole().equals("ADMIN"))
+            return entryService.findAll().stream().peek(entry -> entry.getApplicationUser().setPassword("")).collect(Collectors.toList());
+        return entryService.findAll().stream().filter(entry -> entry.getApplicationUser().getId() == applicationUser.getId()).peek(entry -> entry.getApplicationUser().setPassword("")).collect(Collectors.toList());
     }
 
     @PostMapping
@@ -46,18 +47,22 @@ public class EntryController {
     public void deleteEntry(@PathVariable long id, Principal principal) {
         ApplicationUser applicationUser = userDetailsService.getUserByUsername(principal.getName());
         Optional<Entry> entry = entryService.findById(id);
-        if(entry.isEmpty()) throw new BadRequestException();
-        if(!applicationUser.getRole().equals("ADMIN") && entry.get().getApplicationUser().getId() != applicationUser.getId()) throw new BadRequestException();
+        if (entry.isEmpty()) throw new BadRequestException();
+        if (!applicationUser.getRole().equals("ADMIN") && entry.get().getApplicationUser().getId() != applicationUser.getId())
+            throw new BadRequestException();
         entryService.deleteEntry(id);
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Entry updateEntry(@Valid @RequestBody Entry entry, Principal principal) {
+    public Entry updateEntry(@PathVariable long id, @Valid @RequestBody Entry entry, Principal principal) {
         ApplicationUser applicationUser = userDetailsService.getUserByUsername(principal.getName());
-        Optional<Entry> e = entryService.findById(entry.getId());
-        if(e.isEmpty()) throw new BadRequestException();
-        if(!applicationUser.getRole().equals("ADMIN") && e.get().getApplicationUser().getId() != applicationUser.getId()) throw new BadRequestException();
+        Optional<Entry> e = entryService.findById(id);
+        if (e.isEmpty()) throw new BadRequestException();
+        entry.setId(id);
+        entry.setApplicationUser(e.get().getApplicationUser());
+        if (!applicationUser.getRole().equals("ADMIN") && e.get().getApplicationUser().getId() != applicationUser.getId())
+            throw new BadRequestException();
         return entryService.updateEntry(entry);
     }
 }

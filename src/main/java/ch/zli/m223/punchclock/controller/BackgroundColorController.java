@@ -6,7 +6,6 @@ import ch.zli.m223.punchclock.service.BackgroundColorService;
 import ch.zli.m223.punchclock.service.UserDetailsServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpServerErrorException;
 
 import javax.ws.rs.BadRequestException;
 import java.security.Principal;
@@ -32,7 +31,7 @@ public class BackgroundColorController {
     }
 
     @PutMapping("/{id}")
-    public BackgroundColor updateBackgroundColor(BackgroundColor backgroundColor, Principal principal) {
+    public BackgroundColor updateBackgroundColor(@RequestBody BackgroundColor backgroundColor, Principal principal) {
         ApplicationUser applicationUser = userDetailsService.getUserByUsername(principal.getName());
         if(!applicationUser.getRole().equals("ADMIN")) throw new BadRequestException();
         return backgroundColorService.updateBackgroundColor(backgroundColor);
