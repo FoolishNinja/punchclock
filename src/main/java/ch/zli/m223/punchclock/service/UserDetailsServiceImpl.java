@@ -33,4 +33,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return applicationUser;
     }
 
+    /**public int getUserCount() {
+        return applicationUserRepository.getApplicationUserByCount();
+    }**/
 }

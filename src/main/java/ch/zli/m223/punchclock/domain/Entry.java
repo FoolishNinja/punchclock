@@ -33,7 +33,6 @@ public class Entry {
     @ManyToOne
     private Category category;
 
-
     public Long getId() {
         return id;
     }

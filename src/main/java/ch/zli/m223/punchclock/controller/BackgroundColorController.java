@@ -6,7 +6,6 @@ import ch.zli.m223.punchclock.service.BackgroundColorService;
 import ch.zli.m223.punchclock.service.UserDetailsServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpServerErrorException;
 
 import javax.ws.rs.BadRequestException;
 import java.security.Principal;
