@@ -22,8 +22,8 @@
             <input required type="password" class="form-control" id="loginInputPassword" placeholder="Password">
         </div>
         <button type="submit" class="btn btn-primary">Login</button>
-        <button class="btn btn-secondary" onclick="promptRegister()">Register</button>
     </form>
+    <button class="btn btn-secondary mt-3" onclick="promptRegister()">Register</button>
 </div>
 <div id="register-form-container" style="display: none;">
     <h3>Register</h3>
@@ -42,8 +42,8 @@
                    placeholder="Repeat password">
         </div>
         <button type="submit" class="btn btn-primary">Register</button>
-        <button class="btn btn-secondary" onclick="promptLogin()">Login</button>
     </form>
+    <button class="btn btn-secondary mt-3" onclick="promptLogin()">Login</button>
 </div>
 <div id="work-time-overview-container" style="display: none;">
     <h3>Overview</h3>
@@ -83,8 +83,8 @@
                    placeholder="Select an end time">
         </div>
         <button type="submit" class="btn btn-primary">Create</button>
-        <button class="btn btn-secondary" onclick="toggleWorkTimeOverview()">Cancel</button>
     </form>
+    <button class="btn btn-secondary mt-3" onclick="toggleWorkTimeOverview()">Cancel</button>
 </div>
 <div id="edit-work-time-container" style="display: none;">
     <h3>Edit work time</h3>
@@ -104,8 +104,87 @@
                    placeholder="Select an end time">
         </div>
         <button type="submit" class="btn btn-primary">Save</button>
-        <button class="btn btn-secondary" onclick="toggleWorkTimeOverview()">Cancel</button>
     </form>
+    <button class="btn btn-secondary mt-3" onclick="toggleWorkTimeOverview()">Cancel</button>
+</div>
+<div id="edit-background-color-container" style="display: none;">
+    <h3>Set background color</h3>
+    <form id="edit-background-color-form">
+        <div class="form-group">
+            <label for="editBackgroundColorInputColor">Background color</label>
+            <input required type="color" class="form-control" id="editBackgroundColorInputColor"
+                   placeholder="Select a color">
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+    <button class="btn btn-secondary mt-3" onclick="toggleWorkTimeOverview()">Cancel</button>
+</div>
+<div id="users-overview-container" style="display: none;">
+    <h3>User overview</h3>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Username</th>
+            <th scope="col">Is admin</th>
+            <th scope="col">Edit</th>
+            <th scope="col">Delete</th>
+        </tr>
+        </thead>
+        <tbody id="users-table-body">
+
+        </tbody>
+    </table>
+    <button class="btn btn-primary" onclick="promptAddUser()">Add new user</button>
+    <button class="btn btn-secondary" onclick="toggleWorkTimeOverview()">Back</button>
+</div>
+<div id="add-user-container" style="display: none;">
+    <h3>Add user</h3>
+    <form id="add-user-form">
+        <div class="form-group">
+            <label for="addUserInputRole">Role</label>
+            <select required class="form-control" id="addUserInputRole">
+                <option value="ADMIN">Admin</option>
+                <option value="USER">User</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="addUserInputUsername">Username</label>
+            <input required type="text" class="form-control" id="addUserInputUsername"
+                   placeholder="Username">
+        </div>
+        <div class="form-group">
+            <label for="addUserInputPassword">Password</label>
+            <input required type="password" class="form-control" id="addUserInputPassword"
+                   placeholder="Password">
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+    <button class="btn btn-secondary mt-3" onclick="toggleWorkTimeOverview()">Cancel</button>
+</div>
+<div id="edit-user-container" style="display: none;">
+    <h3>Edit user</h3>
+    <form id="edit-user-form">
+        <div class="form-group">
+            <label for="editUserInputRole">Role</label>
+            <select required class="form-control" id="editUserInputRole">
+                <option value="ADMIN">Admin</option>
+                <option value="USER">User</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="editUserInputUsername">Username</label>
+            <input required type="text" class="form-control" id="editUserInputUsername"
+                   placeholder="Username">
+        </div>
+        <div class="form-group">
+            <label for="editUserInputPassword">Password</label>
+            <input required type="password" class="form-control" id="editUserInputPassword"
+                   placeholder="Password">
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+    <button class="btn btn-secondary mt-3" onclick="toggleWorkTimeOverview()">Cancel</button>
 </div>
 </body>
 </html>

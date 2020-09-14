@@ -1,9 +1,11 @@
 const URL = 'http://localhost:8081';
-let entries = [], categories = [], currentEntryId = -1;
+let entries = [], categories = [], users = [], currentEntryId = -1, currentUserId = -1, backgroundColor = '#FFFFFF',
+    role = 'USER';
 
 let loginContainer, registerContainer, workTimeOverviewContainer, addWorkTimeContainer, editWorkTimeContainer,
-    loginForm, registerForm,
-    addWorkTimeForm, entriesTableBody, addWorkTimeInputCategory, editWorkTimeInputCategory, editWorkTimeForm;
+    loginForm, registerForm, addWorkTimeForm, entriesTableBody, addWorkTimeInputCategory, editWorkTimeInputCategory,
+    editWorkTimeForm, editBackgroundColorContainer, editBackgroundColorForm, usersOverviewContainer, usersTableBody,
+    addUserContainer, addUserForm, editUserContainer, editUserForm;
 
 const formatDate = (date) => {
     let d = date;
@@ -21,6 +23,123 @@ const getHeaders = () => {
     }
 };
 
+const getUsers = async () => {
+    return new Promise((resolve, reject) => {
+        fetch(`${URL}/users`, {
+            method: 'GET',
+            headers: getHeaders(),
+        })
+            .then(async res => {
+                if (res.status === 200) {
+                    res.json().then(users => resolve(users));
+                } else reject();
+            })
+            .catch(err => reject(err));
+    });
+};
+
+const createUser = async (role, username, password) => {
+    return new Promise((resolve, reject) => {
+        fetch(`${URL}/users`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify({role, username, password})
+        })
+            .then(async res => {
+                if (res.status === 201) {
+                    res.json().then(user => resolve(user));
+                } else reject();
+            })
+            .catch(err => reject(err));
+    })
+};
+
+const updateUser = async (role, username, password) => {
+    return new Promise((resolve, reject) => {
+        fetch(`${URL}/users/${currentUserId}`, {
+            method: 'PUT',
+            headers: getHeaders(),
+            body: JSON.stringify({
+                role,
+                username,
+                password
+            })
+        })
+            .then(res => {
+                res.json().then(data => {
+                    if (res.status === 200) {
+                        resolve(data);
+                        return;
+                    }
+                    reject(null);
+                })
+            })
+            .catch(err => reject(err));
+    });
+};
+
+const deleteUser = async (id) => {
+    return new Promise((resolve, reject) => {
+        fetch(`${URL}/users/${id}`, {
+            method: 'DELETE',
+            headers: getHeaders()
+        })
+            .then(res => {
+                users.splice(users.map(user => user.id).indexOf(id), 1);
+                displayUsers();
+                resolve(true);
+            })
+            .catch(err => reject(err));
+    });
+};
+
+const getBackgroundColor = () => {
+    return new Promise((resolve, reject) => {
+        fetch(`${URL}/background-color`, {
+            method: 'GET',
+            headers: getHeaders(),
+        })
+            .then(async res => {
+                if (res.status === 200) {
+                    res.json().then(color => resolve(color));
+                } else reject();
+            })
+            .catch(err => reject(err));
+    });
+};
+
+const updateBackgroundColor = (color) => {
+    return new Promise((resolve, reject) => {
+        fetch(`${URL}/background-color/1`, {
+            method: 'PUT',
+            headers: getHeaders(),
+            body: JSON.stringify({id: 1, color})
+        })
+            .then(async res => {
+                if (res.status === 200) {
+                    res.json().then(color => resolve(color));
+                } else reject();
+            })
+            .catch(err => reject(err));
+    });
+};
+
+const getUserRole = () => {
+    return new Promise((resolve, reject) => {
+        fetch(`${URL}/users/role`, {
+            method: 'GET',
+            headers: getHeaders(),
+        })
+            .then(async res => {
+                if (res.status === 200) {
+                    res.text().then(role => resolve(role));
+                } else reject();
+            })
+            .catch(err => reject(err));
+    });
+};
+
+
 const login = async (username, password) => {
     return new Promise((resolve, reject) => {
         fetch(`${URL}/login`, {
@@ -34,6 +153,8 @@ const login = async (username, password) => {
                     toggleLogin('none');
                     entries = await getEntries();
                     categories = await getCategories();
+                    displayBackgroundColor(await getBackgroundColor());
+                    await loadAdminComponents();
                     toggleWorkTimeOverview();
                 } else reject();
             })
@@ -153,11 +274,63 @@ const isAuthenticated = async () => {
         try {
             entries = await getEntries();
             categories = await getCategories();
+            displayBackgroundColor(await getBackgroundColor());
+            await loadAdminComponents();
             resolve(true);
         } catch (err) {
             resolve(false);
         }
     });
+};
+
+const loadAdminComponents = async () => {
+    role = await getUserRole();
+    if (role !== 'ADMIN') return;
+    let setBackgroundColorButton = document.createElement('button');
+    setBackgroundColorButton.addEventListener('click', () => promptEditBackgroundColor());
+    setBackgroundColorButton.className = 'btn btn-primary';
+    setBackgroundColorButton.innerText = 'Set background color';
+    workTimeOverviewContainer.appendChild(setBackgroundColorButton);
+    let manageUsersButton = document.createElement('button');
+    manageUsersButton.addEventListener('click', () => promptManageUsersOverview());
+    manageUsersButton.className = 'ml-1 btn btn-primary';
+    manageUsersButton.innerText = 'Manage users';
+    workTimeOverviewContainer.appendChild(manageUsersButton);
+    document.getElementById('editBackgroundColorInputColor').value = backgroundColor;
+    users = await getUsers();
+    displayUsers();
+};
+
+const displayBackgroundColor = (color) => {
+    document.body.style.backgroundColor = color.color;
+};
+
+const displayUsers = () => {
+    usersTableBody.innerHTML = '';
+    for (const user of users) {
+        const tr = document.createElement('tr');
+        let userIdTd = document.createElement('td');
+        userIdTd.scope = 'row';
+        userIdTd.innerText = user.id;
+        let userUsernameTd = document.createElement('td');
+        userUsernameTd.innerText = user.username;
+        let userIsAdminTd = document.createElement('td');
+        userIsAdminTd.innerText = user.role === 'ADMIN' ? 'yes' : 'no';
+        let userEditTd = document.createElement('td');
+        let userEditButton = document.createElement('button');
+        userEditButton.className = 'btn btn-primary';
+        userEditButton.innerText = 'Edit';
+        userEditButton.addEventListener('click', () => toggleEditUser(user.id));
+        userEditTd.appendChild(userEditButton);
+        let userDeleteButtonTd = document.createElement('td');
+        let userDeleteButton = document.createElement('button');
+        userDeleteButton.className = 'btn btn-danger';
+        userDeleteButton.innerText = 'Delete';
+        userDeleteButton.addEventListener('click', () => toggleDeleteUser(user.id));
+        userDeleteButtonTd.appendChild(userDeleteButton);
+        tr.append(userIdTd, userUsernameTd, userIsAdminTd, userEditTd, userDeleteButtonTd);
+        usersTableBody.appendChild(tr);
+    }
 };
 
 const displayEntries = () => {
@@ -217,6 +390,17 @@ const displayEntry = (id) => {
     document.getElementById('editWorkTimeInputCheckOut').value = entry.checkOut.substring(0, entry.checkOut.length - 3);
 };
 
+const displayUser = (id) => {
+    currentUserId = id;
+    const user = users.filter(ele => ele.id === id)[0];
+    if (!user) return;
+    for (let option of document.getElementById('editUserInputRole').children) {
+        if (option.value === user.role) option.required = true;
+    }
+    document.getElementById('editUserInputUsername').value = user.username;
+    document.getElementById('editUserInputPassword').value = user.password;
+}
+
 const toggleLogin = (d) => {
     const display = loginContainer.style.display;
     loginContainer.style.display = d ? d : (display === 'none' ? 'initial' : 'none');
@@ -232,6 +416,10 @@ const toggleWorkTimeOverview = (d) => {
     workTimeOverviewContainer.style.display = d ? d : (display === 'none' ? 'initial' : 'none');
     toggleAddNewWorkTime('none');
     toggleEditNewWorkTime('none');
+    toggleEditBackgroundColor('none');
+    toggleUsersOverview('none');
+    toggleAddUser('none');
+    toggleEditCurrentUser('none');
     displayEntries();
 };
 
@@ -246,6 +434,11 @@ const toggleEditNewWorkTime = (d) => {
     editWorkTimeContainer.style.display = d ? d : (display === 'none' ? 'initial' : 'none');
 };
 
+const toggleEditCurrentUser = (d) => {
+    const display = editUserContainer.style.display;
+    editUserContainer.style.display = d ? d : (display === 'none' ? 'initial' : 'none');
+};
+
 const toggleEditEntry = (id) => {
     displayEntry(id);
     toggleWorkTimeOverview('none');
@@ -255,6 +448,32 @@ const toggleEditEntry = (id) => {
 const toggleDeleteEntry = async (id) => {
     if (!confirm('Are you sure you want to delete this work time?')) return;
     await deleteEntry(id);
+};
+
+const toggleDeleteUser = async (id) => {
+    if (!confirm('Are you sure you want to delete this user?')) return;
+    await deleteUser(id);
+};
+
+const toggleEditUser = (id) => {
+    displayUser(id);
+    toggleWorkTimeOverview('none');
+    toggleEditCurrentUser();
+};
+
+const toggleEditBackgroundColor = (d) => {
+    const display = editBackgroundColorContainer.style.display;
+    editBackgroundColorContainer.style.display = d ? d : (display === 'none' ? 'initial' : 'none');
+};
+
+const toggleUsersOverview = (d) => {
+    const display = usersOverviewContainer.style.display;
+    usersOverviewContainer.style.display = d ? d : (display === 'none' ? 'initial' : 'none');
+};
+
+const toggleAddUser = (d) => {
+    const display = addUserContainer.style.display;
+    addUserContainer.style.display = d ? d : (display === 'none' ? 'initial' : 'none');
 };
 
 const promptLogin = () => {
@@ -270,6 +489,21 @@ const promptRegister = () => {
 const promptAddNewWorkTime = () => {
     toggleWorkTimeOverview('none');
     toggleAddNewWorkTime();
+};
+
+const promptEditBackgroundColor = () => {
+    toggleWorkTimeOverview('none');
+    toggleEditBackgroundColor();
+};
+
+const promptManageUsersOverview = () => {
+    toggleWorkTimeOverview('none');
+    toggleUsersOverview();
+};
+
+const promptAddUser = () => {
+    toggleWorkTimeOverview('none');
+    toggleAddUser();
 };
 
 const handleLogin = async () => {
@@ -326,6 +560,42 @@ const handleEditWorkTime = async () => {
     }
 };
 
+const handleEditBackgroundColor = async () => {
+    const editBackgroundColorInputColor = document.getElementById('editBackgroundColorInputColor');
+    if (editBackgroundColorInputColor.value.length !== 7) return;
+    console.log(editBackgroundColorInputColor.value);
+    const color = await updateBackgroundColor(editBackgroundColorInputColor.value);
+    if (color !== null) {
+        displayBackgroundColor(color);
+        toggleWorkTimeOverview('initial');
+    }
+};
+
+const handleCreateUser = async () => {
+    const addUserInputRole = document.getElementById('addUserInputRole');
+    const addUserInputUsername = document.getElementById('addUserInputUsername');
+    const addUserInputPassword = document.getElementById('addUserInputPassword');
+    if (!['ADMIN', 'USER'].includes(addUserInputRole.value) || addUserInputUsername.value.length === 0 || addUserInputPassword.value.length === 0) return;
+    const user = await createUser(addUserInputRole.value, addUserInputUsername.value, addUserInputPassword.value);
+    if (user !== null) {
+        users.push(user);
+        toggleWorkTimeOverview('initial');
+    }
+};
+
+const handleEditUser = async () => {
+    const editUserInputRole = document.getElementById('editUserInputRole');
+    const editUserInputUsername = document.getElementById('editUserInputUsername');
+    const editUserInputPassword = document.getElementById('editUserInputPassword');
+    if (!['ADMIN', 'USER'].includes(editUserInputRole.value) || editUserInputUsername.value.length === 0 || editUserInputPassword.value.length === 0) return;
+    const updated = await updateUser(editUserInputRole.value, editUserInputUsername.value, editUserInputPassword.value);
+    if (updated !== null) {
+        users.splice(entries.map(user => user.id).indexOf(currentUserId), 1);
+        users.push(updated);
+        toggleWorkTimeOverview('initial');
+    }
+}
+
 const loadItems = () => {
     loginContainer = document.getElementById('login-form-container');
     registerContainer = document.getElementById('register-form-container');
@@ -339,6 +609,14 @@ const loadItems = () => {
     editWorkTimeContainer = document.getElementById('edit-work-time-container');
     editWorkTimeInputCategory = document.getElementById('editWorkTimeInputCategory');
     editWorkTimeForm = document.getElementById('edit-work-time-form');
+    editBackgroundColorContainer = document.getElementById('edit-background-color-container');
+    editBackgroundColorForm = document.getElementById('edit-background-color-form');
+    usersOverviewContainer = document.getElementById('users-overview-container');
+    usersTableBody = document.getElementById('users-table-body');
+    addUserContainer = document.getElementById('add-user-container');
+    addUserForm = document.getElementById('add-user-form');
+    editUserContainer = document.getElementById('edit-user-container');
+    editUserForm = document.getElementById('edit-user-form');
 };
 
 const preventFormDefaults = () => {
@@ -357,6 +635,18 @@ const preventFormDefaults = () => {
     editWorkTimeForm.addEventListener('submit', e => {
         e.preventDefault();
         handleEditWorkTime();
+    });
+    editBackgroundColorForm.addEventListener('submit', e => {
+        e.preventDefault();
+        handleEditBackgroundColor();
+    });
+    addUserForm.addEventListener('submit', e => {
+        e.preventDefault();
+        handleCreateUser();
+    });
+    editUserForm.addEventListener('submit', e => {
+        e.preventDefault();
+        handleEditUser();
     });
 };
 

@@ -31,7 +31,7 @@ public class BackgroundColorController {
     }
 
     @PutMapping("/{id}")
-    public BackgroundColor updateBackgroundColor(BackgroundColor backgroundColor, Principal principal) {
+    public BackgroundColor updateBackgroundColor(@RequestBody BackgroundColor backgroundColor, Principal principal) {
         ApplicationUser applicationUser = userDetailsService.getUserByUsername(principal.getName());
         if(!applicationUser.getRole().equals("ADMIN")) throw new BadRequestException();
         return backgroundColorService.updateBackgroundColor(backgroundColor);
